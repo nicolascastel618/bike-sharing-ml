@@ -1,0 +1,46 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=2.5cm}
+
+\title{\textbf{PRDL Report: Theoretical Machine Learning Analysis}\\ \large Predictive and Descriptive Learning}
+\author{Nicolas CASTEL}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Introduction and Objectives}
+This report demonstrates the theoretical understanding of various machine learning models applied to the UCI Bike Sharing dataset. The objective is to analyze the fundamentals, hyperparameters, limitations, and theoretical usefulness of regression, classification, and unsupervised models.
+
+\section{Theoretical Exploratory Data Analysis (EDA)}
+Before modeling, the statistical properties of the data were analyzed:
+\begin{itemize}
+    \item \textbf{Target Distribution:} The continuous target variable, \texttt{cnt} (total hourly rentals), is heavily right-skewed. From a theoretical standpoint, this violates the normality assumption of standard Ordinary Least Squares (OLS) regression.
+    \item \textbf{Multicollinearity:} The correlation matrix reveals a near-perfect correlation (0.99) between \texttt{temp} and \texttt{atemp} (feels-like temperature). Including both in a linear model would cause severe multicollinearity, inflating the variance of the coefficient estimates. One must be dropped prior to training.
+\end{itemize}
+
+\section{Regression Models (Theory)}
+To predict the continuous target \texttt{cnt}, two models of varying complexity were theoretically evaluated and compared.
+
+\subsection{Linear Regression (Baseline)}
+Linear Regression assumes a linear relationship between the independent variables (e.g., hour, temperature) and the target. However, bike rentals exhibit non-linear patterns (e.g., rentals peak at 25$^{\circ}$C but drop at 35$^{\circ}$C). Consequently, the baseline linear model underfitted the data, yielding a low $R^2$ of 0.3860 and a high RMSE of 139.44.
+
+\subsection{Random Forest Regressor (Ensemble)}
+To capture non-linear relationships and complex feature interactions, a Random Forest Regressor was employed. By aggregating multiple decision trees trained on bootstrap samples (bagging), the model reduces variance while maintaining low bias. This theoretical advantage was empirically proven, as the ensemble model achieved a significantly higher $R^2$ of 0.9435 and a lower RMSE of 42.30.
+
+\subsection{Ablation Study: Hyperparameter Tuning}
+An ablation study was conducted via \texttt{RandomizedSearchCV} to evaluate the impact of hyperparameters. Specifically, \texttt{n\_estimators} (number of trees) and \texttt{max\_depth} (tree depth) were tuned. The optimized model (\texttt{n\_estimators}=500, \texttt{max\_depth}=30) slightly improved performance (RMSE: 42.03, $R^2$: 0.9442). Restricting the depth theoretically regularizes the model, preventing individual trees from overfitting to the training noise.
+
+\section{Classification Models (Theory)}
+% To be completed: Discussion on decision boundaries, logistic sigmoid functions, and evaluation metrics (ROC/PR).
+
+\section{Unsupervised Learning (Theory)}
+% To be completed: Mathematical derivation of PCA and the objective function of K-Means clustering.
+
+\section{AI Error Bounty and Cognitive Debt}
+% To be completed: Critical analysis of AI hallucinations encountered during the theoretical study.
+
+\end{document}

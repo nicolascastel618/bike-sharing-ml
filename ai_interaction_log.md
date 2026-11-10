@@ -1,0 +1,4 @@
+### Error 1: OS-Specific Terminal Command Hallucination
+* **The incorrect code/reasoning:** The AI provided a Bash-formatted command (`mkdir data notebooks src reports figures`) to create multiple directories simultaneously, failing to account for my Windows environment.
+* **Verification methodology (how I detected it):** My Windows PowerShell terminal returned a `PositionalParameterNotFound` error, failing to parse the multiple arguments.
+* **Corrective action (how it was solved):** I provided the exact error message back to the AI. It recognized the PowerShell context and provided the corrected syntax to create each directory individually.
