@@ -15,6 +15,8 @@
 \section{Introduction and MLOps Methodology}
 This report details the practical implementation of machine learning pipelines using Python and \texttt{scikit-learn}. The project adheres to MLOps best practices by separating the exploratory analysis (Jupyter Notebooks) from the reusable preprocessing pipelines (\texttt{src/preprocessing.py}) and maintaining version control via Git and GitHub.
 
+The complete codebase is publicly available at: \url{https://github.com/YOUR-GITHUB-USERNAME/bike-sharing-ml-prdl}.
+
 \section{Exploratory Data Analysis Implementation}
 The initial Exploratory Data Analysis (EDA) was performed using \texttt{pandas} for data manipulation and \texttt{seaborn}/\texttt{matplotlib} for visualization. A correlation heatmap was generated using \texttt{sns.heatmap()} to inspect relationships between weather variables and hourly bike rentals, directly informing our feature selection process.
 
@@ -44,12 +46,27 @@ The optimized Random Forest significantly outperformed the baseline. A scatter p
 \end{figure}
 
 \section{Classification Implementation}
-% To be completed: Implementation of tree-based models vs linear models, and confusion matrix plotting.
+For the peak-demand classification task, \texttt{LogisticRegression} and \texttt{RandomForestClassifier} were implemented. Model performance was exported visually using \texttt{seaborn}'s heatmap function applied to the \texttt{confusion\_matrix}, and \texttt{matplotlib} was used to overlay ROC curves based on the models' probability outputs (\texttt{predict\_proba()}).
+
+% \begin{figure}[h]
+%     \centering
+%     % \includegraphics[width=0.6\textwidth]{../figures/rf_confusion_matrix.png}
+%     \caption{Random Forest Confusion Matrix}
+% \end{figure}
 
 \section{Unsupervised Implementation}
-% To be completed: Scikit-learn implementation of PCA and K-Means, including Elbow method plots.
+The unsupervised pipeline was built using \texttt{scikit-learn}.
+\begin{itemize}
+    \item \textbf{Algorithm Stack:} \texttt{StandardScaler} was chained with \texttt{PCA(n\_components=2)} for dimensionality reduction. Subsequently, \texttt{KMeans(n\_clusters=3)} was fitted to discover latent weather and temporal usage profiles.
+\end{itemize}
+
+% \begin{figure}[h]
+%     \centering
+%     % \includegraphics[width=0.7\textwidth]{../figures/pca_kmeans_clusters.png}
+%     \caption{K-Means Clusters Visualized with PCA}
+% \end{figure}
 
 \section{AI Assistants and Copilot Integration}
-GitHub Copilot was integrated into the VS Code environment to assist with pipeline generation. Copilot was specifically prompted to write the cross-validation logic using \texttt{RandomizedSearchCV}, accelerating the hyperparameter tuning phase. All AI interactions and generated code were reviewed for syntactical correctness and logical validity.
+GitHub Copilot was integrated into the VS Code environment to assist with pipeline generation. Copilot was specifically prompted to write the cross-validation logic using \texttt{RandomizedSearchCV}, accelerating the hyperparameter tuning phase. Furthermore, prompts were carefully engineered (e.g., explicitly instructing the AI to use \texttt{predict\_proba} for ROC metrics) to ensure accurate evaluation. All AI interactions and generated code were rigorously reviewed for syntactical correctness and logical validity.
 
 \end{document}

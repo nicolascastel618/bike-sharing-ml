@@ -35,12 +35,23 @@ To capture non-linear relationships and complex feature interactions, a Random F
 An ablation study was conducted via \texttt{RandomizedSearchCV} to evaluate the impact of hyperparameters. Specifically, \texttt{n\_estimators} (number of trees) and \texttt{max\_depth} (tree depth) were tuned. The optimized model (\texttt{n\_estimators}=500, \texttt{max\_depth}=30) slightly improved performance (RMSE: 42.03, $R^2$: 0.9442). Restricting the depth theoretically regularizes the model, preventing individual trees from overfitting to the training noise.
 
 \section{Classification Models (Theory)}
-% To be completed: Discussion on decision boundaries, logistic sigmoid functions, and evaluation metrics (ROC/PR).
+The problem was framed as binary classification to predict peak demand hours (top 25\% of rentals).
+\begin{itemize}
+    \item \textbf{Imbalanced Classes and Metrics:} Because peak hours represent a minority class (25\%), traditional Accuracy is a flawed metric. The evaluation relied on Precision, Recall, and the ROC-AUC score, which are robust to class imbalance.
+    \item \textbf{Decision Boundaries:} The Logistic Regression achieved an AUC of 0.823, while the Random Forest achieved 0.982. The Random Forest's superior performance is theoretically due to its ability to build orthogonal, non-linear decision boundaries, effectively isolating complex feature interactions that a single linear hyperplane cannot separate.
+\end{itemize}
 
 \section{Unsupervised Learning (Theory)}
-% To be completed: Mathematical derivation of PCA and the objective function of K-Means clustering.
+\begin{itemize}
+    \item \textbf{Scaling Importance:} Standardizing the features using \texttt{StandardScaler} was a mandatory theoretical step. Since PCA maximizes variance and K-Means minimizes Euclidean distance, unscaled features (e.g., humidity percentages vs. raw temperature) would artificially dominate the objective functions.
+    \item \textbf{Dimensionality Reduction:} PCA was applied to project the dataset into 2D space. The first two principal components only explained 33.6\% (18.9\% + 14.7\%) of the total variance. This mathematically proves that the feature space is highly multidimensional and cannot be perfectly compressed into a 2D plane without significant information loss.
+\end{itemize}
 
 \section{AI Error Bounty and Cognitive Debt}
-% To be completed: Critical analysis of AI hallucinations encountered during the theoretical study.
+Throughout this project, strategic AI usage was strictly monitored to avoid cognitive debt:
+\begin{itemize}
+    \item \textbf{OS Command Hallucination:} The AI initially provided a Bash-formatted command (\texttt{mkdir data notebooks...}) which failed in the Windows PowerShell environment. The error was identified via the \texttt{PositionalParameterNotFound} traceback and corrected by executing sequential directory creations.
+    \item \textbf{ROC Curve Probability Trap:} When instructed to plot ROC curves, it was critically verified that the AI utilized the \texttt{predict\_proba()} method rather than standard discrete predictions (\texttt{predict()}), which is a common AI hallucination that destroys the True Positive Rate calculation thresholds.
+\end{itemize}
 
 \end{document}
