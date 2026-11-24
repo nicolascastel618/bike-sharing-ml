@@ -3,55 +3,140 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{geometry}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tocloft}
 \geometry{margin=2.5cm}
 
-\title{\textbf{PRDL Report: Theoretical Machine Learning Analysis}\\ \large Predictive and Descriptive Learning}
-\author{Nicolas CASTEL}
-\date{\today}
-
 \begin{document}
-\maketitle
 
-\section{Introduction and Objectives}
-This report demonstrates the theoretical understanding of various machine learning models applied to the UCI Bike Sharing dataset. The objective is to analyze the fundamentals, hyperparameters, limitations, and theoretical usefulness of regression, classification, and unsupervised models.
+% --- TITLE PAGE ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\scshape\LARGE ETSIT UPM \par}
+    \vspace{1cm}
+    {\scshape\Large Master in Machine Learning and Big Data\par}
+    \vspace{1.5cm}
+    {\huge\bfseries Predictive and Descriptive Learning\par}
+    \vspace{0.5cm}
+    {\Large\bfseries Mid-term Activities Report: \par Developing Machine Learning Models\par}
+    \vspace{2cm}
+    {\Large \textbf{Name:} Nicolas CASTEL\par}
+    \vspace{0.5cm}
+    {\large \textbf{Date:} \today\par}
+    \vfill
+    {\large A theoretical analysis of regression, classification, and unsupervised models applied to Urban Mobility and Bike Sharing demand.\par}
+    \vspace{2cm}
+\end{titlepage}
 
-\section{Theoretical Exploratory Data Analysis (EDA)}
-Before modeling, the statistical properties of the data were analyzed:
+\tableofcontents
+\newpage
+\listoftables
+\listoffigures
+\newpage
+
+% --- SECTION 1 ---
+\section{Developing Machine Learning Models}
+\subsection{Problem description}
+Urban mobility and micro-mobility solutions, such as bike-sharing systems, have become crucial components of modern smart cities. The business problem addressed in this report revolves around understanding and predicting the demand for shared bicycles. Accurately forecasting bike demand is critical for fleet management, ensuring that bikes are rebalanced across stations to meet user needs, reducing maintenance costs, and optimizing the operational logistics of the service provider.
+
+\subsection{Machine Learning approach}
+To comprehensively address this problem, the methodology leverages the three fundamental paradigms of Machine Learning, as discussed during the PRDL lectures:
+\begin{enumerate}
+    \item \textbf{Regression:} Predicting the exact continuous number of bike rentals per hour (\texttt{cnt}) based on weather and temporal features.
+    \item \textbf{Classification:} Predicting whether a specific hour will experience "Peak Demand" (binary target) to allow for preemptive logistical actions.
+    \item \textbf{Unsupervised Learning:} Applying clustering and dimensionality reduction to discover latent profiles or natural regimes within the weather and temporal data without prior labels.
+\end{enumerate}
+
+% --- SECTION 2 ---
+\section{Data Description}
+\subsection{Data bases}
+The dataset utilized is the "Bike Sharing Dataset" from the UCI Machine Learning Repository. It contains hourly aggregated counts of rental bikes in the Capital Bikeshare system (Washington D.C.) between 2011 and 2012, merged with corresponding weather and seasonal information. The raw dataset contains 17,379 hourly observations.
+
+\subsection{Data preparation}
+From a theoretical standpoint, data preparation is critical to avoid data leakage and to satisfy algorithm assumptions. The variables \texttt{casual} and \texttt{registered} directly sum to the target \texttt{cnt}. Retaining these features would induce catastrophic data leakage, allowing the model to achieve artificial perfection without learning underlying weather patterns. Furthermore, the variable \texttt{atemp} (feels-like temperature) was identified as highly correlated with \texttt{temp}. To prevent multicollinearity, which inflates the variance of coefficient estimates in linear models, \texttt{atemp} was discarded.
+
+% --- SECTION 3 ---
+\section{Exploratory Data Analysis (EDA)}
+\subsection{Introduction}
+Exploratory Data Analysis (EDA) is employed to summarize the main characteristics of the dataset, often visualizing them. This statistical analysis helps uncover underlying structures, test hypotheses, and verify assumptions before applying complex algorithms.
+
+\subsection{EDA for Regression}
+For the regression task, the target is continuous. Statistical analysis of the \texttt{cnt} variable reveals a heavily right-skewed distribution. The majority of hours observe low rental volumes, while certain peak hours exhibit massive spikes. Theoretically, this violates the normality assumption of Ordinary Least Squares (OLS) regression residuals. 
+Regarding feature correlation, temperature (\texttt{temp}) exhibits the strongest positive correlation with rentals, while humidity (\texttt{hum}) demonstrates a negative correlation.
+
+\subsection{EDA for Classification}
+For the classification task, a discrete target was engineered: \texttt{is\_peak\_demand}. This binary variable flags hours where the rental count exceeds the 75th percentile of the historical distribution. Consequently, the dataset is inherently imbalanced (75\% Class 0, 25\% Class 1). This imbalance strictly dictates the evaluation methodology, as standard accuracy would be mathematically misleading.
+
+% --- SECTION 4 ---
+\section{Experimental Setup}
+\subsection{Introduction and Model Evaluation}
+To ensure the models generalize well to unseen data, cross-validation techniques were theoretically and practically employed. A single train-test split can lead to high variance in performance estimates. Instead, $K$-Fold Cross-Validation partitions the data into $K$ subsets. The model is trained on $K-1$ folds and validated on the remaining fold, rotating until all folds have served as a validation set. For hyperparameter tuning, \texttt{RandomizedSearchCV} was used, acting as an inner validation loop to optimize parameters without overfitting to the final hold-out test set.
+
+\subsection{Evaluation methodology for Classification}
+Given the imbalanced nature of the target class, the following metrics were theoretically selected over standard Accuracy:
 \begin{itemize}
-    \item \textbf{Target Distribution:} The continuous target variable, \texttt{cnt} (total hourly rentals), is heavily right-skewed. From a theoretical standpoint, this violates the normality assumption of standard Ordinary Least Squares (OLS) regression.
-    \item \textbf{Multicollinearity:} The correlation matrix reveals a near-perfect correlation (0.99) between \texttt{temp} and \texttt{atemp} (feels-like temperature). Including both in a linear model would cause severe multicollinearity, inflating the variance of the coefficient estimates. One must be dropped prior to training.
+    \item \textbf{Precision:} The ratio of true positives to total predicted positives: $Precision = \frac{TP}{TP + FP}$.
+    \item \textbf{Recall (Sensitivity):} The ratio of true positives to total actual positives: $Recall = \frac{TP}{TP + FN}$.
+    \item \textbf{F1-Score:} The harmonic mean of Precision and Recall.
+\end{itemize}
+Additionally, the Receiver Operating Characteristic (ROC) curve plots the True Positive Rate (TPR) against the False Positive Rate (FPR) at various threshold settings. The Area Under the Curve (AUC) provides an aggregate measure of performance across all possible classification thresholds.
+
+\subsection{Evaluation methodology for Regression}
+For continuous predictions, error magnitude and variance explanation are paramount:
+\begin{itemize}
+    \item \textbf{Mean Absolute Error (MAE):} The average magnitude of absolute errors: $MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i - \hat{y}_i|$. It is robust to outliers.
+    \item \textbf{Root Mean Squared Error (RMSE):} Penalizes larger errors more heavily due to squaring: $RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}$.
+    \item \textbf{R-squared ($R^2$):} The proportion of variance in the dependent variable explained by the model: $R^2 = 1 - \frac{\sum (y_i - \hat{y}_i)^2}{\sum (y_i - \bar{y})^2}$.
 \end{itemize}
 
-\section{Regression Models (Theory)}
-To predict the continuous target \texttt{cnt}, two models of varying complexity were theoretically evaluated and compared.
+% --- SECTION 5 ---
+\section{Machine Learning Models}
+\subsection{Model selection for Regression}
+\textbf{Linear Regression:} The baseline model attempts to draw a linear hyperplane through the multidimensional feature space. It assumes an additive and linear relationship.
+\\
+\textbf{Random Forest Regressor:} An ensemble learning method based on decision trees. It utilizes 'Bagging' (Bootstrap Aggregating) to train numerous trees on random subsets of the data and averages their predictions. This theoretically minimizes the high variance typically associated with individual decision trees, while seamlessly capturing non-linear relationships without requiring explicit feature transformations.
 
-\subsection{Linear Regression (Baseline)}
-Linear Regression assumes a linear relationship between the independent variables (e.g., hour, temperature) and the target. However, bike rentals exhibit non-linear patterns (e.g., rentals peak at 25$^{\circ}$C but drop at 35$^{\circ}$C). Consequently, the baseline linear model underfitted the data, yielding a low $R^2$ of 0.3860 and a high RMSE of 139.44.
+\subsection{Model selection for Classification}
+\textbf{Logistic Regression:} Despite its name, this is a classification algorithm. It maps linear combinations of features to probabilities using the Sigmoid function: $f(x) = \frac{1}{1 + e^{-x}}$. A threshold (usually 0.5) is then applied to classify the probability into a discrete class.
+\\
+\textbf{Random Forest Classifier:} Operates similarly to the regressor but outputs the mode of the classes predicted by individual trees. It is highly resistant to overfitting and effectively handles the non-linear decision boundaries required to separate peak from non-peak demand hours.
 
-\subsection{Random Forest Regressor (Ensemble)}
-To capture non-linear relationships and complex feature interactions, a Random Forest Regressor was employed. By aggregating multiple decision trees trained on bootstrap samples (bagging), the model reduces variance while maintaining low bias. This theoretical advantage was empirically proven, as the ensemble model achieved a significantly higher $R^2$ of 0.9435 and a lower RMSE of 42.30.
+\subsection{Model selection for Unsupervised Learning}
+\textbf{Principal Component Analysis (PCA):} An orthogonal linear transformation that projects the data into a new coordinate system such that the greatest variance by scalar projection lies on the first coordinate (first principal component). It is defined mathematically via the eigenvectors of the data's covariance matrix.
+\\
+\textbf{K-Means Clustering:} An iterative algorithm that partitions the dataset into $K$ non-overlapping subsets. It aims to minimize the within-cluster sum of squares (WCSS), iteratively assigning points to the nearest centroid (via Euclidean distance) and updating the centroids until convergence.
 
-\subsection{Ablation Study: Hyperparameter Tuning}
-An ablation study was conducted via \texttt{RandomizedSearchCV} to evaluate the impact of hyperparameters. Specifically, \texttt{n\_estimators} (number of trees) and \texttt{max\_depth} (tree depth) were tuned. The optimized model (\texttt{n\_estimators}=500, \texttt{max\_depth}=30) slightly improved performance (RMSE: 42.03, $R^2$: 0.9442). Restricting the depth theoretically regularizes the model, preventing individual trees from overfitting to the training noise.
+% --- SECTION 6 ---
+\section{Results}
+\subsection{Results for Regression}
+The linear regression baseline achieved an $R^2$ of 0.3860 and an RMSE of 139.44. In contrast, the Random Forest Regressor achieved a vastly superior $R^2$ of 0.9435 and an RMSE of 42.30. 
+\textbf{Discussion:} The dramatic improvement in $R^2$ mathematically proves the presence of complex non-linear relationships in the dataset (e.g., peak rentals at 25$^{\circ}$C, but sharp declines during extreme heat or rain). An ablation study via hyperparameter tuning (restricting \texttt{max\_depth} to 30) further optimized the RMSE to 42.03, theoretically validating the need to regularize tree depth to prevent overfitting.
 
-\section{Classification Models (Theory)}
-The problem was framed as binary classification to predict peak demand hours (top 25\% of rentals).
-\begin{itemize}
-    \item \textbf{Imbalanced Classes and Metrics:} Because peak hours represent a minority class (25\%), traditional Accuracy is a flawed metric. The evaluation relied on Precision, Recall, and the ROC-AUC score, which are robust to class imbalance.
-    \item \textbf{Decision Boundaries:} The Logistic Regression achieved an AUC of 0.823, while the Random Forest achieved 0.982. The Random Forest's superior performance is theoretically due to its ability to build orthogonal, non-linear decision boundaries, effectively isolating complex feature interactions that a single linear hyperplane cannot separate.
-\end{itemize}
+\subsection{Results for Classification}
+The Logistic Regression achieved an ROC-AUC of 0.823, while the Random Forest Classifier attained an outstanding ROC-AUC of 0.982. 
+\textbf{Discussion:} The Random Forest's ability to easily isolate the minority class ("Peak Demand") demonstrates that the underlying decision boundaries are highly non-linear. The classification report indicated strong Precision and Recall for the Random Forest, confirming its robustness to the 75/25 class imbalance inherent in the target definition.
 
-\section{Unsupervised Learning (Theory)}
-\begin{itemize}
-    \item \textbf{Scaling Importance:} Standardizing the features using \texttt{StandardScaler} was a mandatory theoretical step. Since PCA maximizes variance and K-Means minimizes Euclidean distance, unscaled features (e.g., humidity percentages vs. raw temperature) would artificially dominate the objective functions.
-    \item \textbf{Dimensionality Reduction:} PCA was applied to project the dataset into 2D space. The first two principal components only explained 33.6\% (18.9\% + 14.7\%) of the total variance. This mathematically proves that the feature space is highly multidimensional and cannot be perfectly compressed into a 2D plane without significant information loss.
-\end{itemize}
+% --- SECTION 7 ---
+\section{Conclusions}
+The application of theoretical Machine Learning principles to the Bike Sharing dataset demonstrated that weather and temporal variables are highly predictive of urban mobility demand.
+From a theoretical standpoint, the failure of linear models relative to ensemble tree-based models confirmed the non-linear, multi-modal nature of human behavior in mobility data. Furthermore, applying dimensionality reduction (PCA) revealed that a significant portion of the dataset's variance cannot be compressed into merely two dimensions, proving the multidimensional complexity of the feature space. Overall, understanding the mathematical assumptions behind metrics (like choosing ROC-AUC over Accuracy for imbalanced data) proved just as critical as the algorithmic implementation itself.
 
+% --- SECTION 8 ---
 \section{AI Error Bounty and Cognitive Debt}
-Throughout this project, strategic AI usage was strictly monitored to avoid cognitive debt:
+As per the course methodology, generative AI assistants were utilized to accelerate code and text generation. However, strict critical analysis was maintained to prevent cognitive debt.
 \begin{itemize}
-    \item \textbf{OS Command Hallucination:} The AI initially provided a Bash-formatted command (\texttt{mkdir data notebooks...}) which failed in the Windows PowerShell environment. The error was identified via the \texttt{PositionalParameterNotFound} traceback and corrected by executing sequential directory creations.
-    \item \textbf{ROC Curve Probability Trap:} When instructed to plot ROC curves, it was critically verified that the AI utilized the \texttt{predict\_proba()} method rather than standard discrete predictions (\texttt{predict()}), which is a common AI hallucination that destroys the True Positive Rate calculation thresholds.
+    \item \textbf{Context/Environment Hallucination:} The AI provided a Bash-specific command for directory creation that failed in the Windows PowerShell environment. The error was manually caught via the traceback and the context was corrected.
+    \item \textbf{ROC Curve Probability Trap:} When prompted to generate ROC evaluation code, the AI's response was closely monitored to ensure it called the \texttt{predict\_proba()} method. Novice AI usage often defaults to \texttt{predict()}, which generates discrete classes and fundamentally breaks the theoretical calculation of the True Positive Rate across varying thresholds.
 \end{itemize}
+
+% --- REFERENCES ---
+\section{References}
+\begin{enumerate}
+    \item Fanaee-T, H., \& Gama, J. (2014). \textit{Event labeling combining ensemble detectors and background knowledge}. Progress in Artificial Intelligence.
+    \item Hastie, T., Tibshirani, R., \& Friedman, J. (2009). \textit{The Elements of Statistical Learning}. Springer.
+    \item UPM ETSIT Predictive and Descriptive Learning Course Materials (2026).
+\end{enumerate}
 
 \end{document}
